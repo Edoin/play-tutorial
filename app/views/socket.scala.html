@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>WebSocket Test</title>
+
+  <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+
+  <style type="text/css" media="screen">
+    body {
+      font-family: 'Raleway', sans-serif;
+      font-size: 0.9em;
+    }
+
+    textarea {
+      display: block;
+      width: 500px; height: 250px;
+    }
+
+    #logSubs, #logReg {
+      display: block;
+      background: #000;
+      color: #76EE00;
+      /*background: #e5e5e5;*/
+      overflow:auto;
+      width: 800px; height: 310px;
+    }
+
+    #urlSubs, #urlReg {
+      height: 30px;
+      width: 300px;
+    }
+
+    #inputSubs, #inputReg {
+      height: 30px;
+      width: 450px;
+    }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+<body>
+
+<div id="logSubs"></div>
+<input type="text" id="urlSubs">
+<button id="connectSubs">Connect</button>
+<button id="disconnectSubs">Disconnect</button><br>
+<input type="text" id="inputSubs">
+<button id="submitSubs">Submit</button>
+
+<hr>
+
+<div id="logReg"></div>
+<input type="text" id="urlReg">
+<button id="connectReg">Connect</button>
+<button id="disconnectReg">Disconnect</button><br>
+<input type="text" id="inputReg">
+<button id="submitReg">Submit</button>
+
+</body>
+</html>
+
+
+<script>
+  var subsCtr = 0;
+  var regsCtr = 0;
+  $(document).ready(function(){
+    scroll();
+  });
+
+  function scroll() {
+    var objSubs = document.getElementById("logSubs");
+    objSubs.scrollTop = objSubs.scrollHeight;
+
+    var objReg = document.getElementById("logReg");
+    objReg.scrollTop = objReg.scrollHeight;
+  }
+
+  function doConnect(url, writeLog, bool) {
+    websocket = new WebSocket(url);
+    websocket.onopen = function(evt) { onOpen(evt, writeLog) };
+    websocket.onclose = function(evt) { onClose(evt, writeLog) };
+    websocket.onmessage = function(evt) { onMessage(evt, writeLog, bool) };
+    websocket.onerror = function(evt) { onError(evt, writeLog) };
+  }
+
+  function doSend(input) {
+    websocket.send(input.val());
+  }
+
+  function doDisconnect(protocol) {
+    websocket.close(protocol);
+  }
+
+  function onOpen(evt, log) {
+    log.text('Connected');
+  }
+
+  function onClose(evt, log) {
+    log.text('Disconnected');
+  }
+
+  function onMessage(evt, log, bool) {
+    log.append('<p> ' + (bool? subsCtr++ : regsCtr++) + ' -> ' + evt.data + '</p>');
+    scroll();
+  }
+
+  function onError(evt, log) {
+    log.text(evt.data);
+  }
+
+
+
+  //Wait to connect.
+  $('#connectSubs').on('click', function() {
+    $('#logSubs').text("Trying to connect...");
+    if($('#urlSubs').val() != "") {
+      doConnect($('#urlSubs').val(), $('#logSubs'), true);
+    } else { $('#logSubs').text("Invalid Url"); }
+  });
+
+  //Do send message & Get Response
+  $('#submitSubs').on('click', function() {
+    doSend($('#inputSubs'));
+  });
+
+  //Disconnect
+  $('#disconnectSubs').on('click', function() {
+    doDisconnect(3000);
+  });
+
+  $('#connectReg').on('click', function() {
+    $('#logReg').text("Trying to connect...");
+    if($('#urlReg').val() != "") {
+      doConnect($('#urlReg').val(), $('#logReg'), false);
+    } else { $('#logReg').text("Invalid Url"); }
+  });
+
+  $('#submitReg').on('click', function() {
+    doSend($('#inputReg'));
+  });
+
+  $('#disconnectReg').on('click', function() {
+    doDisconnect(4000);
+  });
+
+
+
+</script>

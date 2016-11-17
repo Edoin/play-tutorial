@@ -1,0 +1,13 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# A home page
+GET   /                           controllers.HomeController.index
+GET   /index2                           controllers.HomeController.index2
+GET   /socket                           controllers.HomeController.socket
+
+# Web jars asset
+GET   /assets/libs/*file          controllers.WebJarAssets.at(file)
+# Map static resources from the /public folder to the /assets URL path
+GET   /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
